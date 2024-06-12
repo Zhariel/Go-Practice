@@ -14,8 +14,7 @@ type Philo struct {
 	id           int
 }
 
-func (p Philo) eat(perms chan []int, eatCount []int, wg2 *sync.WaitGroup) {
-	defer wg2.Done()
+func (p Philo) eat(perms chan []int, eatCount []int) {
 	perm := <-perms
 	if (p.id != perm[0] && p.id != perm[1]) || eatCount[p.id] <= 0 {
 		return
@@ -39,7 +38,6 @@ func sum(sli []int) int {
 
 func main() {
 	var wg sync.WaitGroup
-	var wg2 sync.WaitGroup
 
 	sticks := make([]Chop, 5)
 	philos := make([]Philo, 5)
@@ -57,13 +55,10 @@ func main() {
 			selected := []int{x, (x + 2) % 5}
 			for i := 0; i < 5; i++ {
 				perms <- selected
-				wg2.Add(1)
-				go philos[i].eat(perms, eatCount, &wg2)
+				go philos[i].eat(perms, eatCount)
 			}
-			wg2.Wait()
 			x = (x + 1) % 5
 		}
 	}()
-
 	wg.Wait()
 }
